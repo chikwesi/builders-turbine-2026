@@ -1,0 +1,15 @@
+# Anchor / Solana
+.anchor
+target/
+test-ledger/
+.surfpool
+
+# Node
+node_modules/
+.yarn/
+
+# Rust
+**/*.rs.bk
+
+# macOS
+.DS_Store
