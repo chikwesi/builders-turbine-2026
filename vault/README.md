@@ -34,6 +34,10 @@ anchor build
 anchor test
 ```
 
+## Tests
+
+![alt text](image.png)
+
 ## Prerequisites
 
 - [Rust](https://www.rust-lang.org/tools/install)
