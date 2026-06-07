@@ -54,7 +54,7 @@ describe("dice-game", () => {
     await conn.confirmTransaction({ signature: txSig, ...recentBlockhash }, FINALITY);
   };
 
-  it("Airdrop", async () => {
+  it("funds house and player wallets via airdrop", async () => {
     await Promise.all(
       [houseKeypair, playerKeypair].map(({ publicKey }) =>
         anchor.getProvider().connection.requestAirdrop(publicKey, 1000 * LAMPORTS_PER_SOL).then(waitForTx)
@@ -62,7 +62,7 @@ describe("dice-game", () => {
     );
   });
 
-  it("initialize =>", async () => {
+  it("creates the vault and deposits initial house liquidity", async () => {
     await diceProgram.methods
       .initialize(new BN(100 * LAMPORTS_PER_SOL))
       .accountsStrict({
@@ -75,7 +75,7 @@ describe("dice-game", () => {
       .then(waitForTx);
   });
 
-  it("place bet =>", async () => {
+  it("player places a bet and deposits wager into vault", async () => {
     await diceProgram.methods
       .placeBet(betSeed, new BN(WAGER_AMOUNT), ROLL_GUESS, Array.from(HASHED_SECRET))
       .accountsStrict({
@@ -90,7 +90,7 @@ describe("dice-game", () => {
       .then(waitForTx);
   });
 
-  it("refund bet fail => cannot refund before timeout", async () => {
+  it("rejects refund when timeout has not been reached", async () => {
     try {
       await diceProgram.methods
         .refundBet()
@@ -109,7 +109,7 @@ describe("dice-game", () => {
     }
   });
 
-  it("resolve bet fail => ", async () => {
+  it("rejects resolution when preimage does not match commitment", async () => {
     const [fakeRevealIx, resolveIx] = await Promise.all([
       diceProgram.methods
         .reveal(randomBytes(32))
@@ -142,7 +142,7 @@ describe("dice-game", () => {
     if (!didFail) throw new Error("Expected resolve transaction to fail but it succeeded");
   });
 
-  it("resolve bet => ", async () => {
+  it("settles bet and closes account when correct preimage is revealed", async () => {
     const [revealIx, resolveIx] = await Promise.all([
       diceProgram.methods
         .reveal(SECRET_BYTES)
